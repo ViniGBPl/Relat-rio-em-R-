@@ -7,7 +7,7 @@
 
 Este repositório contém um relatório interativo em R Markdown que analisa a evolução da taxa de desemprego na Califórnia de janeiro de 1976 a fevereiro de 2025. Utilizando dados oficiais do programa Local Area Unemployment Statistics (LAUS) do Bureau of Labor Statistics e do portal data.ca.gov, o projeto explora padrões sazonais, choques econômicos, variações regionais e métricas de emprego ao longo do tempo.
 
-##Relatório Online
+## Relatório Online
 Confira o relatório interativo publicado no RPubs: https://rpubs.com/vinigb/1321095
 
 ## Conteúdo

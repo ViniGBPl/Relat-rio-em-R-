@@ -47,8 +47,6 @@ Com o uso de pacotes como `dplyr`,`DT`, `lubridate` e `ggplot2`:
 
 Com essa abordagem, vou conseguir tanto uma **visão geral** quanto uma **análise detalhada**, que permitirá ao usuário compreender tanto o **contexto histórico** quanto as **peculiaridades** de determinados municípios.
 
-
-
 ### Como a Análise Ajudará os Clientes
 
 Esta avaliação permitirá que diferentes grupos de interesse — como **governantes, comunidades, empresas e investidores** — tomem **decisões mais embasadas**. Por exemplo:
@@ -59,7 +57,6 @@ Esta avaliação permitirá que diferentes grupos de interesse — como **govern
 - **Pesquisadores e jornalistas** encontrarão uma base de dados pronta para apoiar suas matérias, relatórios e estudos específicos sobre o tema.
 
 Em suma, essa abordagem permitirá uma avaliação **clara, baseada em dados e relevante** sobre o mercado de trabalho na Califórnia.
-
 
 ## Pacotes Requeridos
 
@@ -152,7 +149,7 @@ O conjunto cobre o período de **janeiro de 1976 a fevereiro de 2025**.
 ```{r importacao-dados, echo=TRUE}
 # Importando o arquivo CSV
 dados <- read.table(
-  "C:/Users/ViniciusLima/Documents/CPAD/laborforceandunemployment_monthly.csv",
+  "https://www.dropbox.com/scl/fi/sslkl9oidvltjap193wls/laborforceandunemployment_monthly.csv?rlkey=7r88iewt5plkvu7yruwwvqh5r&st=y3qif3bb&dl=1",
   header = TRUE,
   sep = ",",
   stringsAsFactors = FALSE
@@ -255,10 +252,6 @@ A seguir são apresentadas as definições de cada coluna do conjunto de dados, 
   Ano de referência usado pelo BLS para revisar e ajustar as séries históricas, garantindo alinhamento com pesquisas de emprego e sistemas de seguro‑desemprego.
 
 
-
-
-
-
 ## Análise Exploratória dos Dados {.tabset}
 ### Variação Sazonal: Taxa de Desemprego por Mês
 #### Gráfico - Média da Taxa de Desemprego Por Área e Por Ano
@@ -339,22 +332,6 @@ Encerramento de ciclos produtivos estáveis (maio).
 A diferença entre o mês com maior média (janeiro) e o menor (dezembro) é de aproximadamente 0,84 ponto percentual, o que, considerando o tamanho da força de trabalho da Califórnia, representa centenas de milhares de pessoas.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### Evolução do número de Empregados e Desempregados na Califórnia
 
 #### Grafico de com empregrados e desempregados
@@ -396,13 +373,6 @@ browsable(div(style = "text-align: center;", ggplotly(grafico_emp_desemp)))
 
 ```
 
-
-
-
-
-
-
-
 #### Tabela de empregados e desempregados da California
 
 ```{r tabela-empregados-desempregados-california, echo=FALSE, message=FALSE, warning=FALSE}
@@ -423,9 +393,6 @@ datatable(
 )
 
 ```
-
-
-
 
 
 O gráfico e a tabela apresentam a **evolução anual da média de empregados e desempregados na Califórnia**, mostrando tanto o **número médio de pessoas empregadas quanto o de desempregadas** ao longo de quase 50 anos (de 1976 a 2025).
@@ -467,13 +434,7 @@ Isso revela uma **recuperação quase ao patamar pré-pandemia**, embora o desem
 
 Em suma, a tabela revela tanto o **impacto de diferentes crises econômicas no mercado de trabalho da Califórnia**, quanto a **capacidade de recuperação da economia ao longo do tempo**, sendo uma importante fonte de avaliação tanto para **formuladores de políticas públicas quanto para empresas e investidores**.
 
-
-
-
-
 ### Desemprego na Califórnia nos anos de 2019, 2020, 2021 e 2024
-
-
 
 #### Grafico da taxa Mensal de Desemprego na Califórnia (2019, 2020, 2021 e 2024)
 
@@ -502,7 +463,6 @@ Evolucao_Mensal_Taxa_Desemprego <- ggplot(california_linha, aes(x = Month, y = U
 browsable(div(style = "text-align: center;", ggplotly(Evolucao_Mensal_Taxa_Desemprego)))
 ```
 
-
 #### Tabela - Taxa Mensal de Desemprego na Califórnia (2019, 2020, 2021 e 2024)
 
 ```{r tabela-california-linha, echo=FALSE, message=FALSE, warning=FALSE}
@@ -523,9 +483,7 @@ DT::datatable(
 
 ```
 
-
 #### Analise dos pontos criticos
-
 
 A **Taxa Mensal de Desemprego na Califórnia (2019, 2020, 2021 e 2024)** e o **gráfico de Evolução Mensal da Taxa de Desemprego na Califórnia** representam a evolução da taxa de desemprego na Califórnia ao longo de **2019, 2020, 2021 e 2024**.  
 
@@ -547,10 +505,6 @@ Este comportamento revela como o **choque da COVID-19** teve um **impacto severo
 
 Isso evidencia tanto a **vulnerabilidade do mercado de trabalho a choques externos**, quanto a **resiliência da economia**, que gradualmente consegue se adaptar e se recompor.  
 Com esses dados, gestores e formuladores de políticas públicas vêm sendo capazes de **traçar estratégias de recuperação**, focando principalmente no **apoio ao emprego** e na **qualificação da força de trabalho**, tentando minimizar o período de desemprego prolongado para determinados grupos.  
-
-
-
-
 
 #### Grafico Anual de desemprego em cada ano 
 
@@ -578,10 +532,7 @@ browsable(div(style = "text-align: center;", ggplotly(Comparativa_da_desemprego)
 
 ```
 
-
-
 #### Tabela Anual de desemprego em cada ano 
-
 
 ```{r echo=FALSE}
 library(dplyr)
@@ -596,17 +547,9 @@ datatable(
 )
 ```
 
-
-
-
-
-
-
 ### Comparação de Empregados e Desempregados nos Condados(2023)
 
-
 #### Comparativo - Empregados e Desempregados em 5 Condados
-
 
 A tabela e o gráfico  a seguir monstram um **comparativo do emprego e desemprego em 2023** nos 5 condados mais populosos da Califórnia: Los Angeles County, Orange County, Riverside County, San Bernardino County e San Diego County.
 
@@ -623,7 +566,6 @@ Isso revela como o mercado de trabalho na Califórnia não é homogêneo; ele ap
 
 - Por fim, o gráfico de barras, junto da tabela, proporciona uma visualização clara e comparativa , mostrando tanto o **total de empregados quanto o de desempregados**.  
 Isso torna mais simples para o observador notar o tamanho do mercado de trabalho de cada condado e também a taxa de desemprego relativa ao total de empregos.
-
 
 #### Grafico - Comparativo de Empregados e Desempregados (2023)
 ```{r comparativa-5-condados, echo=TRUE, message=FALSE, warning=FALSE}
@@ -670,12 +612,9 @@ datatable(
 )
 ```
 
-
-
 ### Comparação do crescimento da força de trabalho com o número de empregados ao logo dos anos 
 
 Nesta seção, criamos uma nova variável chamada **Taxa de Emprego**, calculada como a razão entre o número de empregados e a força de trabalho total. Essa métrica nos ajuda a avaliar **em quais anos era mais fácil estar empregado**, além de comparar o crescimento do mercado com a absorção real de trabalhadores.
-
 
 #### Tabela - Evolução da Força de Trabalho, Empregados e Taxa de Emprego na Califórnia
 ```{r echo=FALSE}
@@ -724,10 +663,6 @@ browsable(div(style = "text-align: center;", ggplotly(grafico_emprego)))
 ```
 
 
-
-
-
-
 #### Gráfico - Taxa de Emprego na Califórnia
 
 ```{r}
@@ -746,7 +681,6 @@ browsable(div(style = "text-align: center;", ggplotly(grafico_taxa_emprego)))
 ```
 
 
-
 A força de trabalho da Califórnia cresceu de cerca de 9,9 milhões em 1976 para quase 20 milhões em 2025, refletindo o aumento populacional e a diversificação econômica.
 
 - Em 2000 e 2019, a Taxa de Emprego ultrapassou 95%, refletindo um cenário de pleno emprego.
@@ -758,7 +692,6 @@ A força de trabalho da Califórnia cresceu de cerca de 9,9 milhões em 1976 par
 - Em 2022–2023, a taxa de emprego voltou a ultrapassar os 95%, demonstrando a recuperação econômica recente.
 
 Essa análise fornece uma métrica complementar à taxa de desemprego tradicional, reforçando em quais momentos era mais provável estar empregado e permitindo diagnósticos de desempenho econômico ao longo do tempo.
-
 
 
 ## Conclusão 

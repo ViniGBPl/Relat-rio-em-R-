@@ -1,0 +1,820 @@
+---
+title: "Análise Temporal da Taxa de Desemprego na Califórnia de 1976 a 2025 "
+author: "Vinícius Lima"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: journal            
+    toc: false               
+    toc_float: false          
+    number_sections: False   
+    fig_caption: true
+    highlight: tango
+    df_print: paged
+    code_folding: none
+---
+<style>
+h1.title {
+  font-size: 5em;
+}
+
+</style>
+
+
+# {.tabset}  
+## Introdução
+### Declaração do Problema
+
+A taxa de desemprego é um **indicador econômico de extrema importância**, pois revela tanto o **perfil do mercado de trabalho** quanto a **saúde da economia** de uma região. Uma taxa de desemprego alta significa que um grande percentual da população quer trabalhar, **mas não consegue encontrar emprego**, enquanto uma taxa baixa revela uma situação econômica relativamente estável.  
+
+Compreender o comportamento da taxa de desemprego ao longo do tempo e nas diferentes comunidades da Califórnia é importante tanto para formuladores de políticas públicas quanto para cidadãos, empresas e investidores, que usam essas informações para tomar **decisões** — como a definição de estratégias de emprego, a avaliação de riscos econômicos e o direcionamento de recursos.
+
+### Como Planejo Abordar o Problema
+
+Neste trabalho, vou usar o conjunto de dados **Local Area Unemployment Statistics (LAUS)** da Califórnia, obtido pelo [data.ca.gov](https://data.ca.gov/dataset/local-area-unemployment-statistics-laus) e que cobre o período de **1976 a 2025**.  
+
+Primeiramente, vou **importar e preparar o conjunto de dados**, removendo duplicatas, convertendo tipos de variável e tentando deixá-la pronta para a avaliação. Em seguida, vou aplicar métodos de **análise exploratória**, como cálculos de média, desvio-padrão e evolução temporal, junto a recursos de **visualização**, como **histogramas, séries temporais e outras métricas**, para destacar determinados padrões.  
+
+### Abordagem Proposta
+
+A abordagem consiste principalmente na combinação de métodos de **análise descritiva** e **visualização de dados**.  
+Com o uso de pacotes como `dplyr`,`DT`, `lubridate` e `ggplot2`:
+
+- Filtrar o conjunto de dados para focar nas comunidades e período de interesse.
+- Transformar determinados tipos de variável para facilitar a manipulação.
+- Agregar as informações para encontrar médias anuais, mensais e outras métricas de interesse.
+- Criar diferentes tipos de **gráficos**, como linha, histograma e boxplot, para destacar a evolução da taxa de desemprego, suas variações ao longo do tempo e suas desigualdades geográficas.
+
+Com essa abordagem, vou conseguir tanto uma **visão geral** quanto uma **análise detalhada**, que permitirá ao usuário compreender tanto o **contexto histórico** quanto as **peculiaridades** de determinados municípios.
+
+
+
+### Como a Análise Ajudará os Clientes
+
+Esta avaliação permitirá que diferentes grupos de interesse — como **governantes, comunidades, empresas e investidores** — tomem **decisões mais embasadas**. Por exemplo:
+
+- **Formuladores de políticas públicas** poderão focar recursos nas comunidades mais afetadas pelo desemprego.
+- **Negócios e empreendedores** serão capazes de avaliar o mercado de trabalho de determinada região antes de fazer investimentos.
+- **Cidadãos** poderão usar esses dados para apoiar suas **escolhas pessoais**, como onde morar ou trabalhar.
+- **Pesquisadores e jornalistas** encontrarão uma base de dados pronta para apoiar suas matérias, relatórios e estudos específicos sobre o tema.
+
+Em suma, essa abordagem permitirá uma avaliação **clara, baseada em dados e relevante** sobre o mercado de trabalho na Califórnia.
+
+
+## Pacotes Requeridos
+
+Neste trabalho serão usados os seguintes pacotes do R.  
+Eles serão **carregados no inicio da execução** para que o leitor tenha clareza sobre o que é preciso para reproduzir a mesma análise.  
+Logo em seguida, vou dar uma **breve explicação sobre o propósito de cada um**.
+```{r message=FALSE, warning=FALSE, results='hide'}
+
+
+pacotes_necessarios <- c("readr","dplyr","ggplot2","lubridate","tidyr","DT","plotly","knitr","htmltools")      
+
+instalar <- pacotes_necessarios[!(pacotes_necessarios %in% installed.packages()[,"Package"])]
+if(length(instalar)) install.packages(instalar)
+
+
+# Leitura eficiente de arquivos CSV
+library(readr)
+#Usa para dimensionar os graficos do plotly
+library(htmltools)
+
+# Manipulação de dados (filter, mutate, group_by, summarise etc.)
+library(dplyr)
+
+# Visualização de dados (gráficos de linha, barras, boxplot etc.)
+library(ggplot2)
+
+# Manipulação de datas (extração de mês, ano, conversão de formatos etc.)
+library(lubridate)
+
+# Transformação de dados (pivot_longer, pivot_wider etc.)
+library(tidyr)
+
+# Tabelas interativas em HTML
+library(DT)
+
+# Gráficos interativos a partir de objetos ggplot
+library(plotly)
+
+# Para renderização e formatação de tabelas no R Markdown
+library(knitr)
+```
+
+### Explicação:
+
+- readr: Utilizado para importar dados em formato CSV de forma rápida e segura, evitando problemas comuns com encoding e tipos de variáveis.
+
+- dplyr: Fornece um conjunto de funções para manipulação de dados de forma concisa e legível. Permite realizar operações como filter, mutate, group_by, summarise, entre outras.
+
+- ggplot2: Principal pacote de visualização de dados no R, usado para criar gráficos sofisticados e personalizáveis como linhas, barras, histogramas e muito mais.
+
+- lubridate: Facilita o tratamento de datas no R, como a conversão de strings em datas e extração de componentes como mês e ano — essencial em análises temporais.
+
+- tidyr: Auxilia na organização da estrutura dos dados, especialmente na transformação entre os formatos "largo" e "longo", muito útil para análises e visualizações.
+
+- DT: Usado para criar tabelas interativas em HTML, que permitem ordenação, busca e paginação no navegador.
+
+- plotly: Permite transformar gráficos ggplot2 em gráficos interativos, possibilitando zoom, tooltip e melhor exploração visual dos dados.
+
+- knitr: Pacote usado internamente no R Markdown para renderizar os blocos de código e resultados, além de permitir a criação de tabelas formatadas com kable.
+
+- htmltools: Pacote usado para editar os gráficos interativos, foi usando para centralizar os gráficos obtidos.
+
+
+## Preparação dos Dados
+### Fonte Original
+
+ Os dados utilizados neste projeto foram obtidos pelo [portal oficial do Governo da Califórnia](https://data.ca.gov/dataset/local-area-unemployment-statistics-laus), na seção **Local Area Unemployment Statistics (LAUS)**.  
+Eles representam uma **série temporal de 1976 a 2025**, mostrando, para diferentes comunidades da Califórnia, o tamanho da força de trabalho, o emprego, o desemprego e a taxa de desemprego.  
+
+### Descrição Detalhada
+
+Este conjunto de dados contém:
+- **210.952 observações**
+- **12 variáveis**
+- Uma combinação de **áreas geográficas**, como o **estado da Califórnia**, determinados **condados** e **áreas metropolitanas**.
+
+Seu **propósito original** é apoiar a avaliação de políticas públicas, a tomada de decisão de empresas e comunidades, e a compreensão das condições do mercado de trabalho ao longo do tempo.  
+O conjunto cobre o período de **janeiro de 1976 a fevereiro de 2025**.
+
+### Peculiaridades:
+
+- A coluna ` Seasonally.Adjusted.Y.N.` revela se o valor foi ajustado sazonalmente.
+- A coluna ` Date_Numeric` chegou como texto, sendo preciso transformá-la para um objeto de data.
+- Alguns registros vêm tanto ajustados quanto não ajustados sazonalmente.  
+- A variável `Year` ficou redundante depois que criamos a nova variável `Date`.
+
+
+### Importação e Limpeza
+
+```{r importacao-dados, echo=TRUE}
+# Importando o arquivo CSV
+dados <- read.table(
+  "C:/Users/ViniciusLima/Documents/CPAD/laborforceandunemployment_monthly.csv",
+  header = TRUE,
+  sep = ",",
+  stringsAsFactors = FALSE
+)
+
+dados <- dados %>% mutate(Date = my(Date_Numeric)) %>%  select(-Date_Numeric) %>% relocate(Date, .after = Month)  
+dados <- dados %>% mutate(Month = factor(Month, levels = month.name, ordered = TRUE))
+dados <- dados %>% mutate(Area.Type = factor(Area.Type,
+                                levels = c("State", "County", "Metropolitan Area", "Sub-County Place"),
+                                ordered = FALSE))    
+dados <- dados %>% mutate(Status = factor(Status, levels = c("Preliminary", "Final"),ordered = FALSE))
+dados <- dados %>%mutate(Benchmark = factor(Benchmark, levels = c(2020, 2024),labels = c("2020", "2024")))
+dados <- dados %>%  mutate(Seasonally.Adjusted.Y.N. = as.factor(Seasonally.Adjusted.Y.N.))
+
+
+```
+
+### Conjunto de Dados Final (Amostra)
+
+Para visualizar interativamente uma amostra do conjunto de dados limpo, utilizamos o pacote **DT**. Aqui exibimos as 10 primeiras linhas, com filtros na parte superior e 5 linhas por página:
+
+```{r amostra-dados-dt, message=FALSE, warning=FALSE}
+library(DT)
+
+# Exibe uma amostra interativa de 10 registros
+datatable(
+  dados %>% sample_n(50),
+  options = list(
+    pageLength = 12,
+    scrollX    = TRUE
+  ),
+  rownames = FALSE
+)
+
+```
+
+### Resumo das Variáveis de Interesse
+
+Neste ponto, resumimos algumas métricas-chave presentes no conjunto de dados.  
+Usamos o `sapply` para aplicar a mesma função a várias colunas de interesse de forma simples e concisa.
+
+```{r sapply-resumo}
+
+estrutura <- data.frame(
+  Variável = names(dados),
+  Classe   = sapply(dados, function(x) class(x)[1]),
+  row.names = NULL,
+  stringsAsFactors = FALSE
+)
+
+
+kable(
+  estrutura,
+  caption = " Estrutura das variáveis do conjunto de dados limpo"
+)
+
+```
+
+A seguir são apresentadas as definições de cada coluna do conjunto de dados, segundo a documentação do programa LAUS do Bureau of Labor Statistics e do portal data.ca.gov.
+
+- **Area.Name**  
+  Nome oficial da unidade geográfica para a qual as estatísticas de força de trabalho foram estimadas (por exemplo, “California”, “Los Angeles County”, “San Diego-Carlsbad MSA”). Identifica a residência das pessoas na força de trabalho. :contentReference[oaicite:0]{index=0}
+
+- **Area.Type**  
+  Categoria da área geográfica:  
+  - **State** (Estado)  
+  - **County** (Condado)  
+  - **Metropolitan Area** (Área Metropolitana)  
+  - **Sub-County Place** (Subdistrito ou localidade menor)  
+  Essa classificação permite comparar estatísticas no nível adequado. :contentReference[oaicite:1]{index=1}
+
+- **Month**  
+  Nome do mês (“January” a “December”), convertido em fator ordenado para suportar análises sazonais e construções de séries temporais.
+
+- **Date**  
+  Objeto `Date` correspondente ao primeiro dia do mês (formato “YYYY‑MM‑01”), criado a partir de `Date_Numeric`. Facilita operações e gráficos baseados em tempo.
+
+- **Seasonally.Adjusted.Y.N.**  
+  Indicador se o valor foi ajustado sazonalmente (“Y”) para remover flutuações regulares (clima, feriados etc.) ou não (“N”). As séries ajustadas são usadas para comparações consistentes ao longo do ano. :contentReference[oaicite:2]{index=2}
+
+- **Status**  
+  Denota se o dado é **Preliminary** (estimativa inicial) ou **Final** (valor revisado e consolidado). Para análises históricas, utiliza-se preferencialmente “Final”.
+
+- **Labor.Force**  
+  Número total de pessoas em idade de trabalhar que estavam ativamente na força de trabalho, ou seja, que tinham emprego ou o estavam procurando (soma de `Employment` + `Unemployment`). :contentReference[oaicite:3]{index=3}
+
+- **Employment**  
+  Quantidade de pessoas empregadas no período de referência.
+
+- **Unemployment**  
+  Quantidade de pessoas desempregadas — disponíveis e procurando trabalho.
+
+- **Unemployment.Rate**  
+  Taxa de desemprego, expressa em percentual e calculada como  
+  \[
+    \frac{\text{Unemployment}}{\text{Labor.Force}} \times 100\%.
+  \] 
+
+- **Benchmark**  
+  Ano de referência usado pelo BLS para revisar e ajustar as séries históricas, garantindo alinhamento com pesquisas de emprego e sistemas de seguro‑desemprego.
+
+
+
+
+
+
+## Análise Exploratória dos Dados {.tabset}
+### Variação Sazonal: Taxa de Desemprego por Mês
+#### Gráfico - Média da Taxa de Desemprego Por Área e Por Ano
+
+```{r echo=TRUE}
+sazonalidade <- dados %>%
+  filter(Area.Name == "California", Seasonally.Adjusted.Y.N. == "N") %>%
+  group_by(Month) %>%
+  summarise(Media_Taxa = mean(Unemployment.Rate, na.rm = TRUE))
+
+grafico_desempregados_por_mes <- ggplot(sazonalidade, aes(x = Month, y = Media_Taxa)) +
+  geom_col(fill = "#7D3C98") +
+  labs(title = "Média da Taxa de Desemprego por Mês (Não Ajustado)",
+       x = "Mês", y = "Taxa de Desemprego (%)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Centralizando o gráfico interativo
+browsable(div(style = "text-align: center;", ggplotly(grafico_desempregados_por_mes)))
+```
+
+
+#### Tabela- Média da Taxa de Desemprego por Mês na Califórnia 
+
+```{r echo=FALSE}
+library(DT)
+
+sazonalidade <- dados %>%
+  filter(Area.Name == "California", Seasonally.Adjusted.Y.N. == "N") %>%
+  group_by(Month) %>%
+  summarise(Media_Taxa = round(mean(Unemployment.Rate, na.rm = TRUE), 2), .groups = "drop")
+
+datatable(
+  sazonalidade,
+  options = list(pageLength = 12, scrollX = TRUE),
+  rownames = FALSE,
+  caption = "Média da Taxa de Desemprego por Mês na Califórnia (Sem Ajuste Sazonal)"
+)
+```
+
+
+
+Ao ser feito a análise da tabela e gráfico, fica perceptivel quw
+A análise da média histórica da taxa de desemprego por mês, sem ajuste sazonal, revela padrões cíclicos relevantes ao longo do ano na Califórnia.
+
+Os meses com maior média de desemprego foram:
+
+- Janeiro (7,6%)
+
+- Julho (7,49%)
+
+- Fevereiro (7,45%)
+
+- Junho (7,26%)
+
+Esses picos refletem comportamentos sazonais típicos do mercado de trabalho. Em janeiro, por exemplo, observa-se um aumento natural do desemprego associado ao fim de contratos temporários de fim de ano (especialmente no comércio e serviços) e à paralisação de atividades sazonais no inverno.
+
+Julho e junho, por sua vez, coincidem com o início e meio das férias escolares e acadêmicas, além da redução de postos de trabalho em setores como educação e serviços temporários. Também pode refletir o fim de ciclos semestrais de contratação.
+
+Por outro lado, os meses com menores médias de desemprego foram:
+
+- Dezembro (6,76%)
+
+- Outubro (6,78%)
+
+- Maio (6,8%)
+
+- Setembro (6,84%)
+
+Esses meses tendem a apresentar maior estabilidade no emprego, por motivos como:
+
+Retomada das atividades após o verão (setembro e outubro);
+
+Picos de contratação no comércio antes das festas (novembro e dezembro);
+
+Encerramento de ciclos produtivos estáveis (maio).
+
+A diferença entre o mês com maior média (janeiro) e o menor (dezembro) é de aproximadamente 0,84 ponto percentual, o que, considerando o tamanho da força de trabalho da Califórnia, representa centenas de milhares de pessoas.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Evolução do número de Empregados e Desempregados na Califórnia
+
+#### Grafico de com empregrados e desempregados
+```{r include=FALSE}
+california_emp_desemp <- dados %>% 
+  filter(Area.Type == "State", Seasonally.Adjusted.Y.N.=="Y" ) %>% 
+  group_by(Year) %>% 
+  summarise(
+    Empregados = mean(Employment, na.rm = TRUE),
+    Desempregados = mean(Unemployment, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+
+```
+
+
+
+```{r grafico-empregados-desempregados-california, echo=TRUE, message=FALSE, warning=FALSE}
+
+
+california_longa <- california_emp_desemp %>% 
+  pivot_longer(cols = c("Empregados", "Desempregados"),
+               names_to = "Status",
+               values_to = "Quantidade")
+
+grafico_emp_desemp <- ggplot(california_longa, aes(x = Year, y = Quantidade / 1e6, color = Status)) + 
+  geom_line(size = 1) + 
+  geom_point(size = 2) + 
+  labs(
+    title = "Evolução de Empregados e Desempregados na Califórnia",
+    x = "Ano",
+    y = "Quantidade (Milhões)"
+  ) + 
+  theme_minimal()
+
+# Centralizando o gráfico interativo
+browsable(div(style = "text-align: center;", ggplotly(grafico_emp_desemp)))
+
+```
+
+
+
+
+
+
+
+
+#### Tabela de empregados e desempregados da California
+
+```{r tabela-empregados-desempregados-california, echo=FALSE, message=FALSE, warning=FALSE}
+california_emp_desemp <- dados %>% 
+  filter(Area.Type == "State", Seasonally.Adjusted.Y.N.=="Y" ) %>% 
+  group_by(Year) %>% 
+  summarise(
+    Empregados = mean(Employment, na.rm = TRUE),
+    Desempregados = mean(Unemployment, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+datatable(
+  california_emp_desemp,
+  options = list(pageLength = 10, scrollX = TRUE),
+  rownames = FALSE,
+  caption = "Evolução de Empregados e Desempregados na Califórnia (1976-2025)"
+)
+
+```
+
+
+
+
+
+O gráfico e a tabela apresentam a **evolução anual da média de empregados e desempregados na Califórnia**, mostrando tanto o **número médio de pessoas empregadas quanto o de desempregadas** ao longo de quase 50 anos (de 1976 a 2025).
+
+É interessante notar algumas **tendências e picos específicos** ao longo desse período:
+
+- **Crescimento gradual do emprego:**  
+  A média de pessoas empregadas aumentou de **cerca de 9 milhões em 1976** para **aproximadamente 18,6 milhões em 2025**.  
+Isso revela tanto o **crescimento populacional** quanto o **desenvolvimento da economia da Califórnia**, que absorveu gradualmente uma maior força de trabalho ao longo das décadas.
+
+- **Períodos de crise:**  
+  A taxa de desemprego apresenta picos particularmente acentuados em determinados período.  
+Isso ficou claro, por exemplo:
+  
+  Em **1982-83**, o desemprego chegou a **aproximadamente 1,2 milhão**, provavelmente reflexo da recessão econômica do período.  
+  
+  
+  Em **2009-2010**, o desemprego na Califórnia atingiu **cerca de 2,1-2,2 milhões de pessoas**, como resultado da **crise financeira de 2008**, também denominada **crise do subprime**.  
+
+Esta crise teve como ponto de partida o **setor imobiliário** nos Estados Unidos, particularmente o **mercado de hipotecas de alto risco (subprime)**. Quando o **preço das casas caiu abruptamente**, muitos mutuários deixaram de pagar suas hipotecas, o que gerou uma **onda de execução de imóveis (foreclosures)**.  
+Isso teve um **efeito dominó sobre o crédito**, já que bancos e outras instituições financeiras estavam fortemente expostos a ativos hipotecários.  
+
+Com o colapso de algumas das principais empresas financeiras, como o **Lehman Brothers**, o crédito ficou escasso tanto para empresas quanto para consumidores.  
+Isso, por sua vez, **levou ao fechamento de empresas, demissões em massa e ao crescimento do desemprego**, particularmente em determinados **setores fortemente dependentes de crédito**, como **construção**, **imobiliário**, **comércio** e **serviços**.  
+
+A Califórnia, sendo um estado com **setor imobiliário robusto e grande concentração populacional**, foi particularmente atingida.  
+Isso se refletiu tanto no **pico do desemprego**, que chegou a **2,2 milhões de pessoas**, quanto na **perda de empregos** nas comunidades.  
+Este período revela como uma **crise originada no mercado financeiro** consegue se propagar para o **setor real da economia**, aumentando o **desemprego**, a **perda de renda** e a **instabilidade social**.
+
+  - Em **2020**, houve um **pico de quase 1,9 milhão de desempregados**, associado ao **choque da COVID-19** e às medidas de isolamento que paralisaram determinados setores da economia.  
+
+- **Tendência de recuperação:**  
+  Na sequência de cada período de crise, verifica-se uma recuperação gradual tanto do emprego quanto do desemprego, mostrando a **resiliência do mercado de trabalho da Califórnia**.  
+Isso ficou particularmente claro no período de 2010-2019, depois da crise de 2008, e também a partir de 2021, depois do pico de 2020.
+
+- **Dados recentes (2024-2025)**:  
+  A taxa de emprego se mantém relativamente alta (acima de 18,6 milhões) enquanto o desemprego ficou em torno de 1 milhão.  
+Isso revela uma **recuperação quase ao patamar pré-pandemia**, embora o desemprego ainda seja maior que o período de 2019.
+
+Em suma, a tabela revela tanto o **impacto de diferentes crises econômicas no mercado de trabalho da Califórnia**, quanto a **capacidade de recuperação da economia ao longo do tempo**, sendo uma importante fonte de avaliação tanto para **formuladores de políticas públicas quanto para empresas e investidores**.
+
+
+
+
+
+### Desemprego na Califórnia nos anos de 2019, 2020, 2021 e 2024
+
+
+
+#### Grafico da taxa Mensal de Desemprego na Califórnia (2019, 2020, 2021 e 2024)
+
+```{r echo=TRUE}
+library(ggplot2)
+library(dplyr)
+
+california_linha <- dados %>% 
+  filter(Area.Type == "State",
+         Seasonally.Adjusted.Y.N. == "Y",
+         Year %in% c(2019, 2020, 2021, 2024)) %>% 
+  select(Year, Month, Unemployment.Rate)
+
+Evolucao_Mensal_Taxa_Desemprego <- ggplot(california_linha, aes(x = Month, y = Unemployment.Rate, color = factor(Year), group = Year)) + 
+  geom_line(linewidth = 1) + 
+  geom_point(size = 2) + 
+  labs(
+    title = "Evolução Mensal da Taxa de Desemprego na Califórnia",
+    x = "Mês",
+    y = "Taxa de Desemprego (%)",
+    color = "Ano"
+  ) + 
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+browsable(div(style = "text-align: center;", ggplotly(Evolucao_Mensal_Taxa_Desemprego)))
+```
+
+
+#### Tabela - Taxa Mensal de Desemprego na Califórnia (2019, 2020, 2021 e 2024)
+
+```{r tabela-california-linha, echo=FALSE, message=FALSE, warning=FALSE}
+library(DT)
+
+california_linha <- dados %>% 
+  filter(Area.Type == "State",
+         Seasonally.Adjusted.Y.N. == "Y",
+         Year %in% c(2019, 2020, 2021, 2024)) %>% 
+  select(Year, Month, Unemployment.Rate)
+
+DT::datatable(
+  california_linha,
+  options = list(pageLength = 10, scrollX = TRUE),
+  rownames = FALSE,
+  caption = "Taxa Mensal de Desemprego na Califórnia (2019, 2020, 2021 e 2024)"
+)
+
+```
+
+
+#### Analise dos pontos criticos
+
+
+A **Taxa Mensal de Desemprego na Califórnia (2019, 2020, 2021 e 2024)** e o **gráfico de Evolução Mensal da Taxa de Desemprego na Califórnia** representam a evolução da taxa de desemprego na Califórnia ao longo de **2019, 2020, 2021 e 2024**.  
+
+É preciso destacar algumas **tendências** e **pontos críticos** que podemos extrair:
+
+- **Em 2019**, a taxa de desemprego ficou relativamente **estável**, oscilando em torno de **4%**, mostrando um período de **pleno emprego** e estabilidade econômica.  
+
+- **Em 2020**, porém, houve um **salto abrupto** na taxa de desemprego a partir de **março**, chegando ao pico de **16,1% em abril de 2020**.  
+Isso corresponde exatamente ao período em que a **pandemia da COVID-19** teve maior impacto no mercado de trabalho, exigindo o fechamento de empresas e medidas de isolamento.  
+
+- A partir de **junho de 2020**, a taxa gradualmente **caiu**, embora tenha permanecido relativamente alta até o fim do ano.  
+Isso revela uma **recuperação gradual**, enquanto determinados setores começaram a retomar suas atividades.  
+
+- Em **2021**, o **movimento de recuperação continuou**, chegando ao final do período com uma taxa de desemprego de **5,4%**, ainda maior que o patamar pré-pandemia, porém **bem distante do pico de 2020**.  
+
+- Finalmente, em **2024**, a taxa ficou relativamente **estável**, oscilando em torno de **5,1% a 5,5%**, mostrando que o **mercado de trabalho se aproximou de um patamar de normalidade**, embora ainda um ponto percentual maior que o período pré-pandemia.  
+
+Este comportamento revela como o **choque da COVID-19** teve um **impacto severo e abrupto** no emprego na Califórnia, seguido de uma **recuperação gradual**, até quase o patamar anterior, embora o desemprego não tenha exatamente retornado ao período de estabilidade de 2019.  
+
+Isso evidencia tanto a **vulnerabilidade do mercado de trabalho a choques externos**, quanto a **resiliência da economia**, que gradualmente consegue se adaptar e se recompor.  
+Com esses dados, gestores e formuladores de políticas públicas vêm sendo capazes de **traçar estratégias de recuperação**, focando principalmente no **apoio ao emprego** e na **qualificação da força de trabalho**, tentando minimizar o período de desemprego prolongado para determinados grupos.  
+
+
+
+
+
+#### Grafico Anual de desemprego em cada ano 
+
+O gráfico e tabela a seguir demostra de forma mais condensada a taxa de desemprego anual que se teve em cada um dos anos apresentados e discutidos.
+```{r echo=TRUE}
+
+california_comp <- dados %>% 
+  filter(Area.Type == "State",
+         Seasonally.Adjusted.Y.N. == "Y",
+         Year %in% c(2019, 2020, 2021, 2024)) %>% 
+  group_by(Year) %>% 
+  summarise(TaxaMedia = mean(Unemployment.Rate, na.rm = TRUE), .groups = "drop")
+
+Comparativa_da_desemprego <- ggplot(california_comp, aes(x = factor(Year), y = TaxaMedia, fill = factor(Year))) + 
+  geom_col() + 
+  labs(
+    title = "Comparativa da taxa de desemprego na Califórnia",
+    x = "Ano",
+    y = "Taxa de Desemprego (%)",
+    fill = "Ano"
+  ) + 
+  theme_minimal()
+
+browsable(div(style = "text-align: center;", ggplotly(Comparativa_da_desemprego)))
+
+```
+
+
+
+#### Tabela Anual de desemprego em cada ano 
+
+
+```{r echo=FALSE}
+library(dplyr)
+library(DT)
+
+# Tabela interativa
+datatable(
+  california_comp,
+  options = list(pageLength = 10, scrollX = TRUE),
+  rownames = FALSE,
+  caption = "Taxa média de desemprego na Califórnia (2018, 2020 e 2024) - Ajustada sazonalmente"
+)
+```
+
+
+
+
+
+
+
+### Comparação de Empregados e Desempregados nos Condados(2023)
+
+
+#### Comparativo - Empregados e Desempregados em 5 Condados
+
+
+A tabela e o gráfico  a seguir monstram um **comparativo do emprego e desemprego em 2023** nos 5 condados mais populosos da Califórnia: Los Angeles County, Orange County, Riverside County, San Bernardino County e San Diego County.
+
+É interessante notar que:
+
+- **Los Angeles County** apresenta o **maior número tanto de empregados quanto de desempregados**, sendo ele o maior centro populacional da Califórnia. Ele registra **aproximadamente 115,2 milhões de pessoas empregadas** e **6,15 milhões de desempregadas**.  
+
+- Por outro lado, o **Orange County** apresenta um **número relativamente alto de empregados (18,7 milhões)**, porém o **desemprego (cerca de 0,67 milhão)** é consideravelmente menor que o de Los Angeles.  
+
+- Riverside, San Bernardino e San Diego seguem uma mesma tendência: o **número de empregados é maior que o de desempregados**, sendo San Diego o 2º maior depois de Los Angeles.  
+
+- A comparação evidencia tanto o **porte populacional de cada condado quanto a proporção de desempregados**.  
+Isso revela como o mercado de trabalho na Califórnia não é homogêneo; ele apresenta **concentrações de emprego e desemprego** que refletem tanto o tamanho populacional quanto a dinâmica econômica de cada região.
+
+- Por fim, o gráfico de barras, junto da tabela, proporciona uma visualização clara e comparativa , mostrando tanto o **total de empregados quanto o de desempregados**.  
+Isso torna mais simples para o observador notar o tamanho do mercado de trabalho de cada condado e também a taxa de desemprego relativa ao total de empregos.
+
+
+#### Grafico - Comparativo de Empregados e Desempregados (2023)
+```{r comparativa-5-condados, echo=TRUE, message=FALSE, warning=FALSE}
+condados_selecionados <- c("Los Angeles County", "Orange County", 
+                          "Riverside County", "San Bernardino County", "San Diego County")
+
+dados_selecionados <- dados %>% 
+  filter(Area.Type == "County", 
+         Area.Name %in% condados_selecionados, Year == 2023) %>% 
+  group_by(Area.Name) %>% 
+  summarise(
+  Total_Empregados = mean(Employment, na.rm = TRUE),
+  Total_Desempregados = mean(Unemployment, na.rm = TRUE),
+  .groups = "drop"
+) %>% 
+  pivot_longer(cols = c("Total_Empregados", "Total_Desempregados"),
+               names_to = "Status",
+               values_to = "Quantidade")
+
+comparativo_empregado_desempregado <- ggplot(dados_selecionados, aes(x = reorder(Area.Name, Quantidade), 
+                                                                     y = Quantidade / 1e6, fill = Status )) + 
+  geom_bar(stat = 'identity', position = "dodge") + 
+  labs(
+    title = "Comparativo de Empregados e Desempregados (2023)", 
+    x = "Condado",
+    y = "Quantidade (Milhões de Pessoas)", 
+    fill = ""
+  ) + 
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+browsable(div(style = "text-align: center;", ggplotly(comparativo_empregado_desempregado)))
+```
+
+
+#### Tabela - Quantidade de Empregados e Desempregados nos 5 Condados da Califórnia (2023)
+
+```{r tesa, echo=FALSE}
+datatable(
+  dados_selecionados,
+  options = list(pageLength = 10, scrollX = TRUE),
+  rownames = FALSE,
+  caption = "Quantidade de Empregados e Desempregados nos 5 Condados da Califórnia (2023)"
+)
+```
+
+
+
+### Comparação do crescimento da força de trabalho com o número de empregados ao logo dos anos 
+
+Nesta seção, criamos uma nova variável chamada **Taxa de Emprego**, calculada como a razão entre o número de empregados e a força de trabalho total. Essa métrica nos ajuda a avaliar **em quais anos era mais fácil estar empregado**, além de comparar o crescimento do mercado com a absorção real de trabalhadores.
+
+
+#### Tabela - Evolução da Força de Trabalho, Empregados e Taxa de Emprego na Califórnia
+```{r echo=FALSE}
+# Calculando força de trabalho, empregados e taxa de emprego
+taxa_emprego_df <- dados %>%
+  filter(Area.Type == "State", Seasonally.Adjusted.Y.N. == "Y") %>%
+  group_by(Year) %>%
+  summarise(
+    Forca_Trabalho = mean(Labor.Force, na.rm = TRUE),
+    Empregados     = mean(Employment, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  mutate(Taxa_Emprego = (Empregados / Forca_Trabalho) * 100)
+
+# Tabela com a Taxa de Emprego
+datatable(
+  taxa_emprego_df %>% mutate(across(.cols = everything(), ~round(.x, 2))),
+  options = list(pageLength = 10, scrollX = TRUE),
+  rownames = FALSE,
+  caption = "Evolução da Força de Trabalho, Empregados e Taxa de Emprego na Califórnia"
+)
+```
+
+#### Gráfico - Evolução da Força de Trabalho e Empregados na Califórnia (1976–2025)
+
+```{r echo=TRUE}
+
+df_longo <- taxa_emprego_df %>%
+  select(Year, Forca_Trabalho, Empregados) %>%
+  pivot_longer(cols = c("Forca_Trabalho", "Empregados"),
+               names_to = "Indicador", values_to = "Quantidade")
+
+grafico_emprego <- ggplot(df_longo, aes(x = Year, y = Quantidade / 1e6, color = Indicador)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+  labs(
+    title = "Evolução da Força de Trabalho e Empregados na Califórnia (1976–2025)",
+    x = "Ano",
+    y = "Milhões de Pessoas",
+    color = "Indicador"
+  ) +
+  theme_minimal()
+
+browsable(div(style = "text-align: center;", ggplotly(grafico_emprego)))
+
+```
+
+
+
+
+
+
+#### Gráfico - Taxa de Emprego na Califórnia
+
+```{r}
+
+grafico_taxa_emprego <- ggplot(taxa_emprego_df, aes(x = Year, y = Taxa_Emprego)) +
+  geom_line(color = "#1ABC9C", size = 1.2) +
+  geom_point(size = 2) +
+  labs(
+    title = "Taxa de Emprego na Califórnia",
+    x = "Ano",
+    y = "Taxa (%)"
+  ) +
+  theme_minimal()
+
+browsable(div(style = "text-align: center;", ggplotly(grafico_taxa_emprego)))
+```
+
+
+
+A força de trabalho da Califórnia cresceu de cerca de 9,9 milhões em 1976 para quase 20 milhões em 2025, refletindo o aumento populacional e a diversificação econômica.
+
+- Em 2000 e 2019, a Taxa de Emprego ultrapassou 95%, refletindo um cenário de pleno emprego.
+
+- Já em 2009, 2010 e 2020, a taxa caiu para menos de 90%, destacando os efeitos da crise financeira global e da pandemia da COVID-19.
+
+- Após cada crise, observa-se uma recuperação gradual, indicando resiliência do mercado de trabalho californiano.
+
+- Em 2022–2023, a taxa de emprego voltou a ultrapassar os 95%, demonstrando a recuperação econômica recente.
+
+Essa análise fornece uma métrica complementar à taxa de desemprego tradicional, reforçando em quais momentos era mais provável estar empregado e permitindo diagnósticos de desempenho econômico ao longo do tempo.
+
+
+
+## Conclusão 
+### Conclusão da Declaração do Problema
+
+O objetivo deste trabalho foi compreender a **evolução da taxa de desemprego** na Califórnia ao longo do tempo, com atenção a padrões sazonais, choques econômicos, variações entre regiões e a capacidade do mercado em absorver a força de trabalho. A análise visou fornecer informações úteis para a **tomada de decisões por gestores públicos, investidores e cidadãos**, com base em evidências históricas e visuais concretas.
+
+### Principais Insights 
+
+A análise revelou descobertas relevantes:
+
+- A **força de trabalho quase dobrou** entre 1976 e 2025, evidenciando crescimento populacional e econômico.
+- A **Taxa de Emprego ultrapassou 95%** em momentos de estabilidade (2000, 2019, 2022–2023), enquanto **caiu para menos de 90%** em crises (1982, 2009, 2020).
+- Foram identificados **padrões sazonais** no desemprego, como os aumentos regulares em **janeiro e julho**.
+- O impacto da **COVID-19 em 2020** foi claro: a taxa de desemprego saltou de ~4% para mais de 16% em poucos meses.
+- A comparação entre os **cinco maiores condados** mostrou que regiões como **Los Angeles e San Diego** concentram grandes volumes de trabalhadores, mas também maiores níveis absolutos de desemprego.
+- A nova métrica criada — **Taxa de Emprego** — revelou em quais anos era **mais provável estar empregado**, oferecendo um contraponto positivo à taxa de desemprego.
+
+### Implicações para os Potenciais Clientes
+
+Esta análise oferece suporte valioso para:
+
+- **Políticas públicas**: permite identificar regiões com maior fragilidade ou resiliência no emprego;
+- **Empresas e investidores**: ajudam na escolha de localizações estratégicas com estabilidade no mercado de trabalho;
+- **Cidadãos**: podem avaliar os melhores períodos e regiões para buscar oportunidades;
+- **Pesquisadores e jornalistas**: encontram aqui uma base robusta para entender o comportamento do emprego ao longo de quase cinco décadas.
+
+A inclusão da **Taxa de Emprego** como métrica interpretativa fornece uma leitura mais acessível e direta da “facilidade de se manter empregado”.
+
+###  Limitações e Possibilidades Futuras
+
+Apesar da riqueza de informações, a análise possui limitações:
+
+- Fatores externos como educação, setor econômico ou renda não foram considerados;
+- A abordagem é descritiva, sem uso de modelos preditivos ou inferenciais;
+- As análises de séries temporais não exploraram projeções futuras.
+
+Como próximos passos, seria possível:
+
+- Integrar dados de **setores de atividade econômica** ou **faixa etária** para refinar conclusões;
+- Aplicar **modelos estatísticos ou de machine learning** para prever taxa de desemprego ou identificar causas;
+- Construir um **dashboard interativo** para que diferentes públicos possam explorar os dados de forma personalizada.
+
+## Referências
+
+- Bureau of Labor Statistics. (2024). *Local Area Unemployment Statistics (LAUS)*. Disponível em: [https://www.bls.gov/lau/](https://www.bls.gov/lau/)
+
+- California Open Data Portal. (2024). *Labor Force and Unemployment Data (1976–2025)*. Disponível em: [https://data.ca.gov/](https://data.ca.gov/)
+
+- Wickham, H., & Grolemund, G. (2016). *R for Data Science: Import, Tidy, Transform, Visualize, and Model Data*. O'Reilly Media.
+
+- Wickham, H. (2016). *ggplot2: Elegant Graphics for Data Analysis*. Springer.
+
+- Xie, Y. (2023). *R Markdown: The Definitive Guide*. Chapman and Hall/CRC. Disponível em: [https://bookdown.org/yihui/rmarkdown/](https://bookdown.org/yihui/rmarkdown/)
+
+- R Core Team. (2025). *R: A language and environment for statistical computing*. R Foundation for Statistical Computing, Vienna, Austria. Disponível em: [https://www.R-project.org/](https://www.R-project.org/)
+
+
+

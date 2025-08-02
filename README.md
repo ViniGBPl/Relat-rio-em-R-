@@ -34,7 +34,8 @@ Este repositório contém um relatório interativo em R Markdown que analisa a e
 > instalados <- pacotes[!pacotes %in% installed.packages()[,"Package"]]
 > if(length(instalados)) install.packages(instalados)
 > ```
-
+##Relatório Online
+Confira o relatório interativo publicado no RPubs: https://rpubs.com/vinigb/1321095
 ## Como Executar
 
 1. Clone este repositório:

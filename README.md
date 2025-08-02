@@ -1,7 +1,7 @@
 # Análise Temporal da Taxa de Desemprego na Califórnia (1976–2025)
 
 **Autor:** Vinícius Lima\
-**Data:** `r Sys.Date()`
+**Data:** `20/06/2025`
 
 ## Descrição
 
@@ -34,7 +34,8 @@ Este repositório contém um relatório interativo em R Markdown que analisa a e
 > instalados <- pacotes[!pacotes %in% installed.packages()[,"Package"]]
 > if(length(instalados)) install.packages(instalados)
 > ```
-
+##Relatório Online
+Confira o relatório interativo publicado no RPubs: https://rpubs.com/vinigb/1321095
 ## Como Executar
 
 1. Clone este repositório:

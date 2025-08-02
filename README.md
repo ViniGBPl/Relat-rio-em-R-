@@ -1,7 +1,7 @@
 # Análise Temporal da Taxa de Desemprego na Califórnia (1976–2025)
 
 **Autor:** Vinícius Lima\
-**Data:** `r Sys.Date()`
+**Data:** `20/06/2025`
 
 ## Descrição
 

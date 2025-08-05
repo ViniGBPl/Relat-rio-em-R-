@@ -29,6 +29,8 @@ A taxa de desemprego é um **indicador econômico de extrema importância**, poi
 
 Compreender o comportamento da taxa de desemprego ao longo do tempo e nas diferentes comunidades da Califórnia é importante tanto para formuladores de políticas públicas quanto para cidadãos, empresas e investidores, que usam essas informações para tomar **decisões** — como a definição de estratégias de emprego, a avaliação de riscos econômicos e o direcionamento de recursos.
 
+![*Figura 1. Bandeira oficial do estado da Califórnia.*](https://upload.wikimedia.org/wikipedia/commons/0/01/Flag_of_California.svg)
+
 ### Como Planejo Abordar o Problema
 
 Neste trabalho, vou usar o conjunto de dados **Local Area Unemployment Statistics (LAUS)** da Califórnia, obtido pelo [data.ca.gov](https://data.ca.gov/dataset/local-area-unemployment-statistics-laus) e que cobre o período de **1976 a 2025**.  
